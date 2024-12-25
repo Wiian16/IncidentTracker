@@ -20,6 +20,26 @@ bot = commands.Bot(intents=intents, command_prefix='/')
 async def on_ready():
     logger.info(f"Logged in as {bot.user}")
 
+@bot.command(name="track")
+async def track_command(ctx, *args):
+    logger.info(f"Track command called by user {ctx.message.author}")
+
+@bot.command(name="report")
+async def report_command(ctx, *args):
+    logger.info(f"Report command called by user {ctx.message.author}")
+
+@bot.command(name="reset")
+async def reset_command(ctx, *args):
+    logger.info(f"Report command called by user {ctx.message.author}")
+
+@bot.command(name="remove")
+async def remove_command(ctx, *args):
+    logger.info(f"Remove command called by user {ctx.message.author}")
+
+@bot.command(name="list")
+async def list_command(ctx):
+    logger.info(f"List command called by user {ctx.message.author}")
+
 # Getting Discord token
 logger.debug("Loading environment variables")
 load_dotenv()
