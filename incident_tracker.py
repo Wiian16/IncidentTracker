@@ -3,6 +3,8 @@ import discord.ext.commands as commands
 from dotenv import load_dotenv
 import os
 import structlog
+import database
+from custom_exceptions import *
 
 # Setting up logging
 logger = structlog.getLogger(__name__)
@@ -22,8 +24,18 @@ async def on_ready():
 
 @bot.command(name="track")
 @commands.guild_only()
-async def track_command(ctx, *args):
+async def track_command(ctx, arg):
     logger.info(f"Track command called by user {ctx.author}")
+    try:
+        database.add_incident(ctx.guild.id, arg)
+    except IncidentAlreadyExistsException:
+        logger.info(f"Incident '{arg}' already exists, nothing done")
+        await ctx.send(f"Oops! It looks like incident `{arg}` already exists, please use `/reset {arg}` to reset it, `/remove"
+                 f" {arg}` to remove it, or choose another name.")
+        return
+
+    await ctx.send(f"Incident `{arg}` successfully created! Use `/report {arg}` to see time since last incident or use `/reset"
+             f" {arg}` to reset the counter.")
 
 @bot.command(name="report")
 @commands.guild_only()
@@ -47,7 +59,7 @@ async def list_command(ctx):
 
 @bot.event
 async def on_command_error(ctx, error):
-    logger.debug(f"{error} received from command {ctx.command}")
+    logger.debug(f"'{error}' received from command '{ctx.command}'")
 
     # Handle private message errors
     if isinstance(error, commands.errors.NoPrivateMessage):
