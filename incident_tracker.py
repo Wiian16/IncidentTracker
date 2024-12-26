@@ -1,11 +1,12 @@
 import discord
-import discord.ext.commands as commands
+from discord.ext import commands
 from dotenv import load_dotenv
 import os
 import structlog
 import database
 from custom_exceptions import *
 import datetime
+from CustomHelpCommand import CustomHelpCommand
 
 # Setting up logging
 logger = structlog.getLogger(__name__)
@@ -17,28 +18,33 @@ intents.message_content = True
 
 # Creating bot with intents
 logger.debug("Creating bot")
-bot = commands.Bot(intents=intents, command_prefix='/')
+bot = commands.Bot(intents=intents, command_prefix='/', help_command=CustomHelpCommand())
+# bot = commands.Bot(intents=intents, command_prefix='/')
 
 @bot.event
 async def on_ready():
     logger.info(f"Logged in as {bot.user}")
 
-@bot.command(name="track")
+@bot.command(name="track",
+             description = "Add an incident to track, the incident will begin being tracked from the time the command is called",
+             brief="Add an incident to track",
+             usage="/track <name>"
+             )
 @commands.guild_only()
-async def track_command(ctx, arg):
+async def track_command(ctx, name: str = commands.parameter(description="Name of the incident to be tracked")):
     logger.info(f"Track command called by user {ctx.author}")
     try:
-        logger.debug(f"Adding incident '{arg}' to guild '{ctx.guild.id}")
-        database.add_incident(ctx.guild.id, arg)
+        logger.debug(f"Adding incident '{name}' to guild '{ctx.guild.id}")
+        database.add_incident(ctx.guild.id, name)
     except IncidentAlreadyExistsException:
-        logger.info(f"Incident '{arg}' already exists in guild '{ctx.guild.id}, nothing done")
-        await ctx.send(f"Oops! It looks like incident `{arg}` already exists, please use `/reset {arg}` to reset it, `/remove"
-                 f" {arg}` to remove it, or choose another name.")
+        logger.info(f"Incident '{name}' already exists in guild '{ctx.guild.id}, nothing done")
+        await ctx.send(f"Oops! It looks like incident `{name}` already exists, please use `/reset {name}` to reset it, `/remove"
+                 f" {name}` to remove it, or choose another name.")
         return
 
     logger.debug("Successfully added incident")
-    await ctx.send(f"Incident `{arg}` successfully created! Use `/report {arg}` to see time since last incident or use `/reset"
-             f" {arg}` to reset the counter.")
+    await ctx.send(f"Incident `{name}` successfully created! Use `/report {name}` to see time since last incident or use `/reset"
+             f" {name}` to reset the counter.")
 
 @bot.command(name="report")
 @commands.guild_only()
@@ -63,7 +69,9 @@ async def report_command(ctx, arg):
 
     await ctx.send(time_str)
 
-@bot.command(name="reset")
+@bot.command(
+    name="reset",
+    )
 @commands.guild_only()
 async def reset_command(ctx, *args):
     logger.info(f"Report command called by user {ctx.author}")
@@ -86,6 +94,13 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.NoPrivateMessage):
         logger.info(f"Command '{ctx.command}' incorrectly used in private message by user '{ctx.author}'")
         await ctx.send("Sorry! This command can only be used in servers.")
+        return
+
+    if isinstance(error, commands.errors.MissingRequiredArgument):
+        logger.info(f"Command '{ctx.command}' used with too few arguments")
+        await ctx.send("Oops! It looks like you used a command with too few arguments, use `/help` to see syntax for"
+                       " all commands.")
+        return
 
 # Getting Discord token
 logger.debug("Loading environment variables")
