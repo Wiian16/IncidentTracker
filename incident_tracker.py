@@ -5,6 +5,7 @@ import os
 import structlog
 import database
 from custom_exceptions import *
+import datetime
 
 # Setting up logging
 logger = structlog.getLogger(__name__)
@@ -29,7 +30,7 @@ async def track_command(ctx, arg):
     try:
         database.add_incident(ctx.guild.id, arg)
     except IncidentAlreadyExistsException:
-        logger.info(f"Incident '{arg}' already exists, nothing done")
+        logger.info(f"Incident '{arg}' already exists in '{ctx.guild.id}, nothing done")
         await ctx.send(f"Oops! It looks like incident `{arg}` already exists, please use `/reset {arg}` to reset it, `/remove"
                  f" {arg}` to remove it, or choose another name.")
         return
@@ -39,8 +40,23 @@ async def track_command(ctx, arg):
 
 @bot.command(name="report")
 @commands.guild_only()
-async def report_command(ctx, *args):
+async def report_command(ctx, arg):
     logger.info(f"Report command called by user {ctx.author}")
+
+    try:
+        incident_time = database.get_incident(ctx.guild.id, arg)
+    except NoSuchIncidentException:
+        logger.info(f"Incident '{arg}' not found in guild '{ctx.guild.id}'")
+        await ctx.send(f"Oops! It looks like incident `{arg}` doesn't exist, use `/track {arg}` to create it.")
+        return
+
+    current_time = datetime.datetime.now()
+    delta_time = current_time - incident_time
+
+    time_str = (f"Time since last incident: {delta_time.days} days, {delta_time.seconds / 60 / 60:.0f} hours, "
+                f"{delta_time.seconds / 60 % 60:.0f} minutes, {delta_time.seconds % 60 % 60:.0f} seconds")
+
+    await ctx.send(time_str)
 
 @bot.command(name="reset")
 @commands.guild_only()
