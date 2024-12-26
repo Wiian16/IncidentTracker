@@ -28,13 +28,15 @@ async def on_ready():
 async def track_command(ctx, arg):
     logger.info(f"Track command called by user {ctx.author}")
     try:
+        logger.debug(f"Adding incident '{arg}' to guild '{ctx.guild.id}")
         database.add_incident(ctx.guild.id, arg)
     except IncidentAlreadyExistsException:
-        logger.info(f"Incident '{arg}' already exists in '{ctx.guild.id}, nothing done")
+        logger.info(f"Incident '{arg}' already exists in guild '{ctx.guild.id}, nothing done")
         await ctx.send(f"Oops! It looks like incident `{arg}` already exists, please use `/reset {arg}` to reset it, `/remove"
                  f" {arg}` to remove it, or choose another name.")
         return
 
+    logger.debug("Successfully added incident")
     await ctx.send(f"Incident `{arg}` successfully created! Use `/report {arg}` to see time since last incident or use `/reset"
              f" {arg}` to reset the counter.")
 
@@ -44,11 +46,14 @@ async def report_command(ctx, arg):
     logger.info(f"Report command called by user {ctx.author}")
 
     try:
+        logger.debug(f"Getting incident '{arg}' from guild '{ctx.guild.id}'")
         incident_time = database.get_incident(ctx.guild.id, arg)
     except NoSuchIncidentException:
         logger.info(f"Incident '{arg}' not found in guild '{ctx.guild.id}'")
         await ctx.send(f"Oops! It looks like incident `{arg}` doesn't exist, use `/track {arg}` to create it.")
         return
+
+    logger.debug("Successfully got incident")
 
     current_time = datetime.datetime.now()
     delta_time = current_time - incident_time
