@@ -26,9 +26,10 @@ async def on_ready():
     logger.info(f"Logged in as {bot.user}")
 
 @bot.command(name="track",
-             description = "Add an incident to track, the incident will begin being tracked from the time the command is called",
+             description = "Add an incident to track, the incident will begin being tracked from the time the command "
+                           "is called",
              brief="Add an incident to track",
-             usage="/track <name>"
+             usage=f"{bot.command_prefix}track <name>"
              )
 @commands.guild_only()
 async def track_command(ctx, name: str = commands.parameter(description="Name of the incident to be tracked")):
@@ -38,15 +39,20 @@ async def track_command(ctx, name: str = commands.parameter(description="Name of
         database.add_incident(ctx.guild.id, name)
     except IncidentAlreadyExistsException:
         logger.info(f"Incident '{name}' already exists in guild '{ctx.guild.id}, nothing done")
-        await ctx.send(f"Oops! It looks like incident `{name}` already exists, please use `/reset {name}` to reset it, `/remove"
-                 f" {name}` to remove it, or choose another name.")
+        await ctx.send(f"Oops! It looks like incident `{name}` already exists, please use `{bot.command_prefix}reset"
+                       f" {name}` to reset it, `{bot.command_prefix}remove {name}` to remove it, or choose another"
+                       f" name.")
         return
 
     logger.debug("Successfully added incident")
-    await ctx.send(f"Incident `{name}` successfully created! Use `/report {name}` to see time since last incident or use `/reset"
-             f" {name}` to reset the counter.")
+    await ctx.send(f"Incident `{name}` successfully created! Use `{bot.command_prefix}report {name}` to see time since"
+                   f" last incident or use `{bot.command_prefix}reset {name}` to reset the counter.")
 
-@bot.command(name="report")
+@bot.command(name="report",
+             description="Get the time since the last reported incident, will report the time in days, hours, minutes, "
+                         "and seconds",
+             brief="Get the time since the last reported incident",
+             usage=f"{bot.command_prefix}report <name>")
 @commands.guild_only()
 async def report_command(ctx, arg):
     logger.info(f"Report command called by user {ctx.author}")
@@ -56,7 +62,7 @@ async def report_command(ctx, arg):
         incident_time = database.get_incident(ctx.guild.id, arg)
     except NoSuchIncidentException:
         logger.info(f"Incident '{arg}' not found in guild '{ctx.guild.id}'")
-        await ctx.send(f"Oops! It looks like incident `{arg}` doesn't exist, use `/track {arg}` to create it.")
+        await ctx.send(f"Oops! It looks like incident `{arg}` doesn't exist, use `{bot.command_prefix}track {arg}` to create it.")
         return
 
     logger.debug("Successfully got incident")
@@ -71,17 +77,26 @@ async def report_command(ctx, arg):
 
 @bot.command(
     name="reset",
+    description="Reset the counter of the incident, the time will be set to the time the command is run",
+    brief="Reset the counter of the incident",
+    usage=f"{bot.command_prefix}reset <name>"
     )
 @commands.guild_only()
 async def reset_command(ctx, *args):
     logger.info(f"Report command called by user {ctx.author}")
 
-@bot.command(name="remove")
+@bot.command(name="remove",
+             description="Remove the incident from being tracked",
+             brief="Remove the incident",
+             usage=f"{bot.command_prefix}remove <name>")
 @commands.guild_only()
 async def remove_command(ctx, *args):
     logger.info(f"Remove command called by user {ctx.author}")
 
-@bot.command(name="list")
+@bot.command(name="list",
+             description="List all incidents being tracked in the server",
+             brief="List all incidents being tracked",
+             usag=f"{bot.command_prefix}list <name>")
 @commands.guild_only()
 async def list_command(ctx):
     logger.info(f"List command called by user {ctx.author}")
@@ -98,8 +113,8 @@ async def on_command_error(ctx, error):
 
     if isinstance(error, commands.errors.MissingRequiredArgument):
         logger.info(f"Command '{ctx.command}' used with too few arguments")
-        await ctx.send("Oops! It looks like you used a command with too few arguments, use `/help` to see syntax for"
-                       " all commands.")
+        await ctx.send(f"Oops! It looks like you used a command with too few arguments, use `{bot.command_prefix}help`"
+                       f" to see syntax for all commands.")
         return
 
 # Getting Discord token
