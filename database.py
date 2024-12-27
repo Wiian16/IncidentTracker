@@ -119,6 +119,9 @@ def remove_incident(guild_id, incident_name):
         if guild_id not in json_data or incident_name not in json_data[guild_id]:
             raise NoSuchIncidentException(f"Incident '{incident_name}' not found in guild '{guild_id}'")
 
-        json_data[guild_id][incident_name] = str(datetime.datetime.now())
+        json_data[guild_id].pop(incident_name)
+
+        if len(json_data[guild_id]) == 0:
+            json_data.pop(guild_id)
 
         _save_file(json_data)

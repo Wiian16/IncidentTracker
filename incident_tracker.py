@@ -112,6 +112,7 @@ async def reset_command(ctx, name: str = commands.parameter(description="Name of
         logger.info(f"Incident '{name}' not found in guild '{ctx.guild.id}'")
         await ctx.send(f"Oops! It looks like incident '{name}' doesn't exist, use `{bot.command_prefix}track {name}` to"
                        f" create it")
+        return
 
     logger.debug("Successfully reset incident")
 
@@ -138,6 +139,10 @@ async def remove_command(ctx, name: str = commands.parameter(description="Name o
         logger.info(f"Incident '{name}' not found in guild '{ctx.guild.id}'")
         await ctx.send(f"Oops! It looks like incident '{name}' doesn't exist, use `{bot.command_prefix}track {name}` to"
                        f" create it")
+        return
+
+    logger.debug("Successfully removed incident")
+    await ctx.send(f"Successfully removed incident `{name}`")
 
 @bot.command(name="list",
              description="List all incidents being tracked in the server",
@@ -169,6 +174,8 @@ async def on_command_error(ctx, error):
         await ctx.send(f"Oops! It looks like you used a command with too few arguments, use `{bot.command_prefix}help`"
                        f" to see syntax for all commands.")
         return
+
+    raise error
 
 # Getting Discord token
 logger.debug("Loading environment variables")
