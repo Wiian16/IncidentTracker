@@ -33,6 +33,13 @@ async def on_ready():
              )
 @commands.guild_only()
 async def track_command(ctx, name: str = commands.parameter(description="Name of the incident to be tracked")):
+    """
+    Command handler for the track command, adds incident to database.json using thread safe database module, if incident
+    is not already in the database for that server, otherwise tells the user that the incident already exists in the
+    server.
+    :param ctx: Context under which the command is called
+    :param name: Name of the incident to track
+    """
     logger.info(f"Track command called by user {ctx.author}")
     try:
         logger.debug(f"Adding incident '{name}' to guild '{ctx.guild.id}")
@@ -54,15 +61,21 @@ async def track_command(ctx, name: str = commands.parameter(description="Name of
              brief="Get the time since the last reported incident",
              usage=f"{bot.command_prefix}report <name>")
 @commands.guild_only()
-async def report_command(ctx, arg):
+async def report_command(ctx, name: str = commands.parameter(description="Name of the incident to report")):
+    """
+    Reports the time since the last incident of given name in the server, if the command exists in the server, otherwise
+    tells the user that the incident does not yet exist in the server.
+    :param ctx: Context under which the command was called
+    :param name: Name of the incident to report
+    """
     logger.info(f"Report command called by user {ctx.author}")
 
     try:
-        logger.debug(f"Getting incident '{arg}' from guild '{ctx.guild.id}'")
-        incident_time = database.get_incident(ctx.guild.id, arg)
+        logger.debug(f"Getting incident '{name}' from guild '{ctx.guild.id}'")
+        incident_time = database.get_incident(ctx.guild.id, name)
     except NoSuchIncidentException:
-        logger.info(f"Incident '{arg}' not found in guild '{ctx.guild.id}'")
-        await ctx.send(f"Oops! It looks like incident `{arg}` doesn't exist, use `{bot.command_prefix}track {arg}` to create it.")
+        logger.info(f"Incident '{name}' not found in guild '{ctx.guild.id}'")
+        await ctx.send(f"Oops! It looks like incident `{name}` doesn't exist, use `{bot.command_prefix}track {name}` to create it.")
         return
 
     logger.debug("Successfully got incident")
@@ -82,7 +95,13 @@ async def report_command(ctx, arg):
     usage=f"{bot.command_prefix}reset <name>"
     )
 @commands.guild_only()
-async def reset_command(ctx, *args):
+async def reset_command(ctx, name: str = commands.parameter(description="Name of the incident to reset")):
+    """
+    Resets the counter for the given incident, if the incident exists in the server, otherwise tells the user that the
+    incident does not yet exist in the server.
+    :param ctx: Context under which the command was called
+    :param name: Name of the command to reset
+    """
     logger.info(f"Report command called by user {ctx.author}")
 
 @bot.command(name="remove",
@@ -90,19 +109,32 @@ async def reset_command(ctx, *args):
              brief="Remove the incident",
              usage=f"{bot.command_prefix}remove <name>")
 @commands.guild_only()
-async def remove_command(ctx, *args):
+async def remove_command(ctx, name: str = commands.parameter(description="Name of the incident to remove")):
+    """
+    Removes the given incident from the database, if it exists in the server, otherwise tells the user that the incident
+    does not yet exist in the server.
+    :param ctx: Context under which the command was called
+    :param name: Name of the incident to remove
+    """
     logger.info(f"Remove command called by user {ctx.author}")
 
 @bot.command(name="list",
              description="List all incidents being tracked in the server",
              brief="List all incidents being tracked",
-             usag=f"{bot.command_prefix}list <name>")
+             usag=f"{bot.command_prefix}list")
 @commands.guild_only()
 async def list_command(ctx):
+    """
+    Lists the incidents currently being tracked in the server
+    :param ctx: Contex under which the command was called
+    """
     logger.info(f"List command called by user {ctx.author}")
 
 @bot.event
 async def on_command_error(ctx, error):
+    """
+    Handles all command errors for the bot, will direct the user to correct usage if possible
+    """
     logger.debug(f"'{error}' received from command '{ctx.command}'")
 
     # Handle private message errors

@@ -1,14 +1,10 @@
-from typing import Any, Mapping, Optional, List
-
 import discord
 from discord.ext import commands
-from discord.ext.commands import Command, Cog
 
 
 class CustomHelpCommand(commands.HelpCommand):
     def __init__(self):
         super().__init__()
-        commands.DefaultHelpCommand
 
     def get_command_signature(self, command: commands.Command, /) -> str:
         return f"/{command.qualified_name} -- {command.short_doc or 'No description provided'}"
