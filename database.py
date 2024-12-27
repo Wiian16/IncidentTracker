@@ -80,3 +80,24 @@ def get_incident(guild_id, incident_name):
         incident_time = datetime.datetime.strptime(json_data[guild_id][incident_name], datetime_format)
 
         return incident_time
+
+def reset_incident(guild_id, incident_name):
+    """
+    THREAD SAFE. Resets the timestamp for the given incident from the given server to the current time, if the incident
+    does not exist, an exception to be raised
+    :param guild_id: Server to check for incident in
+    :param incident_name: Incident name to reset
+    :raises NoSuchIncidentException:
+    """
+    with lock:
+        json_data = _load_file()
+
+        # Convert to string because 1 != "1"
+        guild_id = str(guild_id)
+
+        if guild_id not in json_data or incident_name not in json_data[guild_id]:
+            raise NoSuchIncidentException(f"Incident '{incident_name}' not found in guild '{guild_id}'")
+
+        json_data[guild_id][incident_name] = str(datetime.datetime.now())
+
+        _save_file(json_data)
