@@ -156,6 +156,17 @@ async def list_command(ctx):
     """
     logger.info(f"List command called by user {ctx.author}")
 
+    incidents = database.get_all_incident_names(ctx.guild.id)
+
+    if len(incidents) == 0:
+        await ctx.send(f"It looks like your server doesn't have any incidents yet! Use `{bot.command_prefix}track` to "
+                       f"create one.")
+        return
+
+    message = f"Your servers incidents: {', '.join(f'`{name}`' for name in incidents)}. "
+
+    await ctx.send(message)
+
 @bot.event
 async def on_command_error(ctx, error):
     """
@@ -169,10 +180,15 @@ async def on_command_error(ctx, error):
         await ctx.send("Sorry! This command can only be used in servers.")
         return
 
+    # Handle missing argument errors
     if isinstance(error, commands.errors.MissingRequiredArgument):
         logger.info(f"Command '{ctx.command}' used with too few arguments")
         await ctx.send(f"Oops! It looks like you used a command with too few arguments, use `{bot.command_prefix}help`"
                        f" to see syntax for all commands.")
+        return
+
+    # Handle incorrect command error, do nothing
+    if isinstance(error, commands.errors.CommandError):
         return
 
     raise error

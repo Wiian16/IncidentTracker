@@ -125,3 +125,21 @@ def remove_incident(guild_id, incident_name):
             json_data.pop(guild_id)
 
         _save_file(json_data)
+
+def get_all_incident_names(guild_id):
+    """
+    THREAD SAFE. Returns a list of all the incident names for the given server. Returns an empty list if the server has
+    no incidents.
+    :param guild_id: Server to get incidents from
+    :return: List of incident names from server
+    """
+    with lock:
+        json_data = _load_file()
+
+        # Convert to string because 1 != "1"
+        guild_id = str(guild_id)
+
+        if guild_id not in json_data:
+            return []
+
+        return json_data[guild_id].keys()
