@@ -101,3 +101,24 @@ def reset_incident(guild_id, incident_name):
         json_data[guild_id][incident_name] = str(datetime.datetime.now())
 
         _save_file(json_data)
+
+def remove_incident(guild_id, incident_name):
+    """
+    THREAD SAFE. Removes a given incident from the given server in the database, if the incident does not exist, an
+    exception is raised.
+    :param guild_id: Server to check for incident in
+    :param incident_name: Incident name to remove
+    :raises NoSuchIncidentException: Raised if the given incident is not found in the server
+    """
+    with lock:
+        json_data = _load_file()
+
+        # Convert to string because 1 != "1"
+        guild_id = str(guild_id)
+
+        if guild_id not in json_data or incident_name not in json_data[guild_id]:
+            raise NoSuchIncidentException(f"Incident '{incident_name}' not found in guild '{guild_id}'")
+
+        json_data[guild_id][incident_name] = str(datetime.datetime.now())
+
+        _save_file(json_data)
