@@ -91,6 +91,12 @@ If you would like to host your own follow these steps:
 9. The Incident Tracker bot will create a database.json file that holds incidents for all servers it is in, do not
 modify this file or remove it unless you want to change the tracked incidents directly
 
+## Important Note
+
+This discord bot is a passion project and a hobby. Because of this, it is self hosted and may not always be available. 
+Please be patient if it is not available. Additionally, if you find any bugs, please report them at 
+https://github.com/Wiian16/IncidentTracker/issues
+
 ## Contributors
 
 [Ian McGillivary](https://github.com/wiian16) -- Creator
