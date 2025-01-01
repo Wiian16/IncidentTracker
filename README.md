@@ -50,6 +50,47 @@ Add an incident to track, the incident will begin being tracked from the time th
 
 Usage: `/track <name>`
 
+## Hosting Your own
+
+If you would like to host your own follow these steps:
+
+1. Download the [repository](https://github.com/Wiian16/IncidentTracker)
+
+    `git clone https://github.com/Wiian16/IncidentTracker`
+
+2. Install dependencies
+
+    `pip install requirements.txt` 
+
+    or your system's package manager
+
+3. Create a discord bot at the [Discord Developer Portal](https://discord.com/developers/applications)
+
+4. Set the following permissions:
+    
+    - "Bot" > "Privileged Gateway Intents" > "Message Content Intent"
+
+    - "Installation" > "Default Install Settings" > "Guild Install" > "Scopes" > "applicatiopns.commands" and "bot"
+
+    - "Installation" > "Default Install Settings" > "Guild Install" > "Permissions" > "Send Messages"
+
+5. Get you bot's token:
+
+    1. Navigate to "Bot" > "Token" and click "Reset Token"
+
+    2. Copy this token and store it somewhere secure
+
+6. Set `DISCORD_TOKEN` environment variable or place it in a .env file in your project directory
+
+7. Run your bot
+
+    `python3 /path/to/repo/incident_tracker.py`
+
+8. Add your bot to servers using the install link in the Developer Portal under "Installation"
+
+9. The Incident Tracker bot will create a database.json file that holds incidents for all servers it is in, do not
+modify this file or remove it unless you want to change the tracked incidents directly
+
 ## Contributors
 
 [Ian McGillivary](https://github.com/wiian16) -- Creator
