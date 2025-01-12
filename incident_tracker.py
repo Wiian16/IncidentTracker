@@ -47,13 +47,13 @@ async def track_command(ctx, name: str = commands.parameter(description="Name of
     except IncidentAlreadyExistsException:
         logger.info(f"Incident '{name}' already exists in guild '{ctx.guild.id}, nothing done")
         await ctx.send(f"Oops! It looks like incident `{name}` already exists, please use `{bot.command_prefix}reset"
-                       f" {name}` to reset it, `{bot.command_prefix}remove {name}` to remove it, or choose another"
-                       f" name.")
+                       f" \"{name}\"` to reset it, `{bot.command_prefix}remove \"{name}\"` to remove it, or choose"
+                       f" another name.")
         return
 
     logger.debug("Successfully added incident")
-    await ctx.send(f"Incident `{name}` successfully created! Use `{bot.command_prefix}report {name}` to see time since"
-                   f" last incident or use `{bot.command_prefix}reset {name}` to reset the counter.")
+    await ctx.send(f"Incident `{name}` successfully created! Use `{bot.command_prefix}report \"{name}\"` to see time"
+                   f" since last incident or use `{bot.command_prefix}reset \"{name}\"` to reset the counter.")
 
 @bot.command(name="report",
              description="Get the time since the last reported incident, will report the time in days, hours, minutes, "
@@ -75,8 +75,8 @@ async def report_command(ctx, name: str = commands.parameter(description="Name o
         incident_time = database.get_incident(ctx.guild.id, name)
     except NoSuchIncidentException:
         logger.info(f"Incident '{name}' not found in guild '{ctx.guild.id}'")
-        await ctx.send(f"Oops! It looks like incident `{name}` doesn't exist, use `{bot.command_prefix}track {name}` to"
-                       f" create it.")
+        await ctx.send(f"Oops! It looks like incident `{name}` doesn't exist, use `{bot.command_prefix}track "
+                       f"\"{name}\"` to create it.")
         return
 
     logger.debug("Successfully got incident")
@@ -110,8 +110,8 @@ async def reset_command(ctx, name: str = commands.parameter(description="Name of
         database.reset_incident(ctx.guild.id, name)
     except NoSuchIncidentException:
         logger.info(f"Incident '{name}' not found in guild '{ctx.guild.id}'")
-        await ctx.send(f"Oops! It looks like incident '{name}' doesn't exist, use `{bot.command_prefix}track {name}` to"
-                       f" create it")
+        await ctx.send(f"Oops! It looks like incident '{name}' doesn't exist, use `{bot.command_prefix}track "
+                       f"\"{name}\"` to create it")
         return
 
     logger.debug("Successfully reset incident")
@@ -133,12 +133,12 @@ async def remove_command(ctx, name: str = commands.parameter(description="Name o
     logger.info(f"Remove command called by user {ctx.author}")
 
     try:
-        logger.debug(f"Removing '{name}' from guild '{ctx.guild.id}'");
+        logger.debug(f"Removing '{name}' from guild '{ctx.guild.id}'")
         database.remove_incident(ctx.guild.id, name)
     except NoSuchIncidentException:
         logger.info(f"Incident '{name}' not found in guild '{ctx.guild.id}'")
-        await ctx.send(f"Oops! It looks like incident '{name}' doesn't exist, use `{bot.command_prefix}track {name}` to"
-                       f" create it")
+        await ctx.send(f"Oops! It looks like incident '{name}' doesn't exist, use `{bot.command_prefix}track "
+                       f"\"{name}\"` to create it")
         return
 
     logger.debug("Successfully removed incident")
